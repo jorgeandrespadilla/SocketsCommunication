@@ -21,11 +21,6 @@ namespace Server
 
         static void Main(string[] args)
         {
-            Data.AddContact(new Contact
-            {
-                Name = "Test",
-                PhoneNumber = "0123456789"
-            });
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             socket.Bind(ServerEndPoint);
@@ -34,6 +29,8 @@ namespace Server
             var socketConnection = socket.Accept();
             Console.WriteLine("Conexión aceptada");
 
+            Data.Seed();
+            
             while (true)
             {
                 byte[] incomingBuffer = new byte[1000];
@@ -43,7 +40,7 @@ namespace Server
                 Console.WriteLine($"La info recibida es {receivedData}");
                 
                 var response = HandleRequest(receivedData);
-                Console.WriteLine($"Info a enviar {response}");
+                Console.WriteLine($"La info a enviar es {response}");
                 byte[] outgoingBuffer = Encoding.Default.GetBytes(response);
                 socketConnection.Send(outgoingBuffer);
             }
@@ -65,7 +62,7 @@ namespace Server
                     return Data.GetContacts();
                 case Command.POST:
                     var contact = JsonConvert.DeserializeObject<Contact>(data);
-                    Console.WriteLine($"Name: {contact.Name}; Phone Number: {contact.PhoneNumber}");
+                    Console.WriteLine($"Nombre: {contact.Name}; Teléfono: {contact.PhoneNumber}");
                     return Data.AddContact(contact);
                 case Command.DELETE:
                     var id = int.Parse(data);
